@@ -1,5 +1,10 @@
 "use client";
-import { useReadContract, ConnectButton, TransactionButton, useActiveAccount } from "thirdweb/react";
+import {
+    useReadContract,
+    ConnectButton,
+    TransactionButton,
+    useActiveAccount,
+} from "thirdweb/react";
 import { useState, useEffect } from "react";
 import { client } from "../client";
 import { createWallet } from "thirdweb/wallets";
@@ -7,24 +12,31 @@ import { baseSepolia, defineChain } from "thirdweb/chains";
 import { prepareContractCall, toWei } from "thirdweb";
 import { contract } from "../utils/contract";
 
+// Define types for the coffee data
+interface Coffee {
+    sender: string;
+    message: string;
+    timestamp: bigint;
+}
+
 const Payme = () => {
     const account = useActiveAccount();
     const wallets = [createWallet("com.coinbase.wallet")];
 
-    const [tipAmount, setTipAmount] = useState(0);
-    const [message, setMessage] = useState("");
-    const [coffees, setCoffees] = useState([]);
+    const [tipAmount, setTipAmount] = useState<number>(0);
+    const [message, setMessage] = useState<string>("");
+    const [coffees, setCoffees] = useState<Coffee[]>([]);
 
-    const truncateWalletAddress = (address) => {
+    const truncateWalletAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
+    };
 
-    const convertDate = (timestamp) => {
+    const convertDate = (timestamp: bigint) => {
         return new Date(Number(timestamp) * 1000).toLocaleString();
     };
 
     // Reading data from the contract
-    const { data, refetch: refetchCoffees } = useReadContract({
+    const { data, refetch: refetchCoffees } = useReadContract<Coffee[]>({
         contract,
         method: "getCoffees",
         params: [],
@@ -32,7 +44,7 @@ const Payme = () => {
 
     useEffect(() => {
         if (data) {
-            setCoffees(data);
+            setCoffees(data as Coffee[]);
         }
     }, [data]);
 
@@ -77,14 +89,14 @@ const Payme = () => {
                         {message && tipAmount > 0 && (
                             <TransactionButton
                                 className="mt-4"
-                                transaction={() => (
+                                transaction={() =>
                                     prepareContractCall({
                                         contract,
                                         method: "buyMeACoffee",
                                         params: [message],
                                         value: BigInt(toWei(tipAmount.toString())),
                                     })
-                                )}
+                                }
                                 onTransactionConfirmed={() => {
                                     alert("Thank you for the tip!");
                                     setTipAmount(0);
@@ -102,22 +114,29 @@ const Payme = () => {
                 <div className="flex flex-col mt-10">
                     <h3 className="font-semibold"> Total Tips: {coffees?.length} </h3>
                     <p className="text-sm font-bold text-n5 mt-2 mb-2"> Recent Tips </p>
-                    {coffees && coffees.length > 0 && (
-                        coffees.reverse().map((coffee, index) => (
-                            <div
-                                className="flex flex-col w-full justify-center gap-4 bg-n1 rounded-md p-4 mb-2"
-                                key={index}
-                            >
-                                <p className="text-xs text-n4"> {truncateWalletAddress(coffee.sender)} </p>
-                                <p className="text-xs text-n4"> {convertDate(coffee.timestamp)} </p>
-                                <p className="text-sm mt-2"> {coffee.message} </p>
-                            </div>
-                        ))
-                    )}
+                    {coffees &&
+                        coffees.length > 0 &&
+                        coffees
+                            .slice()
+                            .reverse()
+                            .map((coffee, index) => (
+                                <div
+                                    className="flex flex-col w-full justify-center gap-4 bg-n1 rounded-md p-4 mb-2"
+                                    key={index}
+                                >
+                                    <p className="text-xs text-n4">
+                                        {truncateWalletAddress(coffee.sender)}
+                                    </p>
+                                    <p className="text-xs text-n4">
+                                        {convertDate(coffee.timestamp)}
+                                    </p>
+                                    <p className="text-sm mt-2"> {coffee.message} </p>
+                                </div>
+                            ))}
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Payme;
