@@ -48,14 +48,14 @@ const Coinbase = () => {
                 ) : (
                     <>
                         {nft && (
-                            <MediaRenderer
+                            <MediaRenderer className="rounded-lg"
                                 client={client}
                                 src={nft.metadata.image}
                             />
                         )}
                         {account ? (
                             <>
-                                <p className="text-center mt-8 text-n8"> 
+                                <p className="text-center mt-4 mb-2 text-n5"> 
                                     You own {ownedNFTs?.toString()} NFTs 
                                 </p>
                                 <TransactionButton
@@ -75,7 +75,7 @@ const Coinbase = () => {
                                 > Claim </TransactionButton>
                             </>
                         ) : (
-                            <p>Connect to claim NFT</p>
+                            <p className="text-center mt-4 text-n5">Connect to claim NFT</p>
                         )}
                     </>
                 )}
