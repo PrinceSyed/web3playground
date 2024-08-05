@@ -36,7 +36,7 @@ const Payme = () => {
     };
 
     // Reading data from the contract
-    const { data, refetch: refetchCoffees } = useReadContract<Coffee[]>({
+    const { data, refetch: refetchCoffees } = useReadContract({
         contract,
         method: "getCoffees",
         params: [],
@@ -44,7 +44,7 @@ const Payme = () => {
 
     useEffect(() => {
         if (data) {
-            setCoffees(data as Coffee[]);
+            setCoffees(data as unknown as Coffee[]);
         }
     }, [data]);
 
